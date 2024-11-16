@@ -1,0 +1,50 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Environment variables
+.env
+
+# Build output
+dist/
+build/
+
+# IDE/Editor files
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+*.swn
+*.bak
+
+# Operating system files
+Thumbs.db
+.DS_Store
+
+# NPM package locks
+package-lock.json*
+yarn.lock
+
+# Coverage directories
+coverage/
+
+# Miscellaneous
+tmp/
+temp/
+*.gz
+*.zip
+*.rar
