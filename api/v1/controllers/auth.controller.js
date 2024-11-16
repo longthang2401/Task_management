@@ -48,7 +48,6 @@ module.exports.login =  async (req, res) => {
 //profile
 module.exports.getProfile = async (req, res) => {
   try {
-    // Lấy userId từ token
     const token = req.headers.authorization.split(' ')[1]; //Bearer <token>
     const decoded = jwt.verify(token, 'your-secret-key');
     const userId = decoded.userId;
