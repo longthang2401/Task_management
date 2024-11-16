@@ -107,32 +107,137 @@ module.exports.getTask = async (req, res) => {
   }
 }
 
-//change status
-module.exports.updateStatus = async (req, res) => {
+//update-fields
+module.exports.updateFields = async (req, res) => {
   try {
-    const { ids, status } = req.body;
+    const { ids, key, value } = req.body;
 
-    // Validate input
+    // Kiểm tra dữ liệu đầu vào
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({ message: "Invalid or missing task IDs" });
+      return res.status(400).json({ message: "Invalid or missing 'ids'" });
     }
-    if (!status) {
-      return res.status(400).json({ message: "Missing status value" });
+    if (!key || typeof key !== "string") {
+      return res.status(400).json({ message: "Invalid or missing 'key'" });
     }
 
-    // Update tasks
+    // Cập nhật
+    const updateData = { [key]: value };
     const result = await Task.updateMany(
-      { _id: { $in: ids }, deleted: false }, 
-      { $set: { status } }
+      { _id: { $in: ids }, deleted: false }, // Điều kiện tìm
+      { $set: updateData }                  // Dữ liệu cập nhật
     );
 
+    // Phản hồi kết quả
     res.json({
-      message: "Task statuses updated successfully",
-      matchedCount: result.matchedCount, 
-      modifiedCount: result.modifiedCount
+      message: "Fields updated successfully",
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+      invalidIds: ids.length - result.matchedCount,
     });
   } catch (error) {
-    console.error("Error updating task statuses:", error);
+    console.error("Error updating fields:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+//create 
+module.exports.createTask = async (req, res) => {
+  try {
+    const { title, status, content, timeStart, timeFinish } = req.body;
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!title || !status || !content) {
+      return res.status(400).json({ message: "Title, status, and content are required" });
+    }
+
+    // Tạo tài liệu mới
+    const newTask = await Task.create({
+      title,
+      status,
+      content,
+      timeStart,
+      timeFinish,
+      deleted: false,
+    });
+
+    // Phản hồi kết quả
+    res.status(201).json({
+      message: "Task created successfully",
+      task: newTask,
+    });
+  } catch (error) {
+    console.error("Error creating task:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+//create multil
+module.exports.createTasks = async (req, res) => {
+  try {
+    const tasks = req.body.tasks;
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+      return res.status(400).json({ message: "Invalid or missing 'tasks' array" });
+    }
+
+    // Tạo nhiều tài liệu cùng lúc
+    const createdTasks = await Task.insertMany(tasks);
+
+    // Phản hồi kết quả
+    res.status(201).json({
+      message: "Tasks created successfully",
+      tasks: createdTasks,
+    });
+  } catch (error) {
+    console.error("Error creating tasks:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+//delete
+module.exports.softDeleteTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const task = await Task.findOneAndUpdate(
+      { _id: id, deleted: false },
+      { deleted: true },
+      { new: true }
+    );
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found or already deleted" });
+    }
+
+    res.json({
+      message: "Task deleted successfully",
+      task,
+    });
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+//delete-hard
+module.exports.hardDeleteTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const task = await Task.findOneAndDelete({ _id: id });
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.json({
+      message: "Task permanently deleted successfully",
+      task,
+    });
+  } catch (error) {
+    console.error("Error permanently deleting task:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
