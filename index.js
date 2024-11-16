@@ -1,4 +1,5 @@
 const express = require("express");
+//const bodyParser = require("body-parser")
 const database = require("./config/DbConfig");
 require("dotenv").config();
 
@@ -10,7 +11,8 @@ const app = express();
 const port = process.env.PORT;
 
 // Middleware để xử lý JSON
-//app.use(express.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
 database.connect()

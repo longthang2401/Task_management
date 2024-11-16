@@ -8,6 +8,8 @@ router.get('/:id(\\w+)', controller.getTask); // Matches single ID
 router.get('/:ids(\\w+(,\\w+)*)', controller.getTasks); // Matches comma-separated IDs
 
 
+router.patch("/status", controller.updateStatus);
+
 module.exports = router;
 
 
